@@ -1,17 +1,17 @@
-import { Container, Image, Text } from '@nextui-org/react';
+import { Container, CSS, Image, Text } from '@nextui-org/react';
+
+const styles: CSS = {
+  display: 'flex',
+  flexDirection: 'column',
+  height: 'calc(100vh - 100px)',
+  alignItems: 'center',
+  justifyContent: 'center',
+  alignSelf: 'center',
+};
 
 export const NoFavorites = () => {
   return (
-    <Container
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: 'calc(100vh - 100px)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        alignSelf: 'center',
-      }}
-    >
+    <Container css={styles}>
       <Text h1>No hay Favoritos</Text>
       <Image
         src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/dream-world/132.svg"

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { GetStaticProps, GetStaticPaths, NextPage } from 'next';
-import { Card, Container, Image, Text, Button, Grid } from '@nextui-org/react';
-import { Layout } from '../../components/layouts';
-import { pokeApi } from '../../api';
-import { Pokemon, SmallPokemon, PokemonListReponse } from '../../interfaces/';
+import { Layout } from '@components/layouts';
+import { pokeApi } from '../../api/';
+import { Pokemon, SmallPokemon, PokemonListReponse } from '@interfaces/';
 import { getPokemonInfo, localFavorites } from '../../utils';
 import confetti from 'canvas-confetti';
+import { PokemonByNameOrId } from '@components/ui/';
 
 interface Props {
   pokemon: Pokemon;
@@ -35,66 +35,11 @@ const PokemonByNamePage: NextPage<Props> = ({ pokemon }) => {
   };
   return (
     <Layout title={pokemon.name}>
-      <Grid.Container css={{ marginTop: '5px' }} gap={2}>
-        <Grid xs={12} sm={4}>
-          <Card hoverable css={{ padding: '30px' }}>
-            <Card.Body>
-              <Card.Image
-                src={
-                  pokemon.sprites.other?.dream_world.front_default ||
-                  '/no-image.png'
-                }
-                alt={pokemon.name}
-                width="100%"
-                height={200}
-              />
-            </Card.Body>
-          </Card>
-        </Grid>
-
-        <Grid xs={12} sm={8}>
-          <Card>
-            <Card.Header
-              css={{ display: 'flex', justifyContent: 'space-between' }}
-            >
-              <Text h1 transform="capitalize">
-                {pokemon.name}
-              </Text>
-              <Button
-                color="gradient"
-                ghost={!isInFavorites}
-                onClick={onToggleFavorite}
-              >
-                {isInFavorites ? 'En Favoritos' : 'Guardar en Favoritos'}
-              </Button>
-            </Card.Header>
-
-            <Card.Body>
-              <Text size={30}>Sprites:</Text>
-              <Container direction="row" display="flex">
-                <Image
-                  src={pokemon.sprites.front_default}
-                  alt={pokemon.name}
-                  width={100}
-                  height={100}
-                />
-                <Image
-                  src={pokemon.sprites.front_shiny}
-                  alt={pokemon.name}
-                  width={100}
-                  height={100}
-                />
-                <Image
-                  src={pokemon.sprites.back_shiny}
-                  alt={pokemon.name}
-                  width={100}
-                  height={100}
-                />
-              </Container>
-            </Card.Body>
-          </Card>
-        </Grid>
-      </Grid.Container>
+      <PokemonByNameOrId
+        pokemon={pokemon}
+        isInFavorites={isInFavorites}
+        onToggleFavorite={onToggleFavorite}
+      />
     </Layout>
   );
 };
@@ -108,17 +53,30 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     paths: pokemonNames.map((name: string) => ({
       params: { name },
     })),
-    fallback: false,
+    // fallback: false,
+    fallback: 'blocking',
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { name } = params as { name: string };
 
+  const pokemon = await getPokemonInfo(name);
+
+  if (!pokemon) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    };
+  }
+
   return {
     props: {
-      pokemon: await getPokemonInfo(name),
+      pokemon,
     },
+    revalidate: 84600,
   };
 };
 
